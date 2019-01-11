@@ -1,0 +1,59 @@
+#include <DallasTemperature.h>
+#include <OneWire.h>
+
+//------------------------------------------
+//DS18B20
+#define ONE_WIRE_BUS 2
+OneWire oneWire(ONE_WIRE_BUS);
+DallasTemperature sensors(&oneWire);
+
+int element = 5;
+float temp;
+int resolution = 12;
+float setpoint = 75.00;
+float hyst = 1.00;
+
+void setup() {
+  Serial.begin(115200);
+  delay(100);
+
+  pinMode(element, OUTPUT);
+
+  Serial.println();
+  Serial.println();
+  Serial.println("Starting up the Dallas Temperature IC Control Library");
+
+  sensors.begin();
+
+  Serial.print("Locating devices...");
+  Serial.print("Found ");
+  Serial.print(sensors.getDeviceCount(), DEC);
+  Serial.println(" devices.");
+  Serial.println();
+
+sensors.setResolution(resolution);
+
+Serial.print("Resolution: ");
+Serial.println(sensors.getResolution());
+Serial.println();
+}
+
+void loop() {
+  sensors.requestTemperatures();
+  temp = sensors.getTempCByIndex(0);
+  Serial.print("Temperature ");
+  Serial.print(temp);
+  Serial.print(" Setpoint ");
+  Serial.print(setpoint);
+  Serial.print(" Hyst ");
+  Serial.print(hyst);
+  Serial.print(" Status ");
+  Serial.println(digitalRead(element));
+  if (temp <= setpoint) {
+    digitalWrite(element, HIGH);
+  }
+  if (temp > (setpoint - hyst)) {
+    digitalWrite(element, LOW);
+  };
+  delay(500);
+}
